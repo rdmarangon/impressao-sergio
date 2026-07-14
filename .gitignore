@@ -1,0 +1,12 @@
+instance/
+templates/
+models.py
+*.db
+*.xlsx
+*.tar.gz
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/

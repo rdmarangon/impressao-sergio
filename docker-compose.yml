@@ -1,0 +1,53 @@
+# DEPLOY em Docker SWARM + Traefik v3  (painel-impressao.ufjf.br)
+#
+# ------------------------------------------------------------------------------
+# COMO ESTÁ (por causa do banco SQLite local):
+#   O banco é um arquivo (volume local do nó) e a imagem é buildada no próprio nó.
+#   Por está fixo no nó `vayu`, com volume e imagem ficam sempre juntos).
+#   Como há mais nós prod e o arquivo do banco só existe no
+#   vayu, NÃO dá pra usar o placement padrão da casa (node.labels.prod==true):
+#   o container poderia subir num nó sem o banco.
+#
+#  Padrão CGCO:
+#   - imagem publicada no registry:
+#       image: registry.docker.ufjf.br/ufjf/impressao/dashboard:v1.0.0
+#     (em vez de buildar local e usar `impressao:1`)
+#   - placement por label, não por hostname:
+#       constraints: [ node.labels.prod == true ]
+#   - storage compartilhado (NFS/volume distribuído) pra o banco não ficar preso
+#     a um nó — pré-requisito pra poder usar o placement por label acima.
+#   - labels de logging padrão:
+#       co.elastic.logs/*, pipeline=..., environment=prod  + rede `monitoring`.
+# ------------------------------------------------------------------------------
+services:
+  impressao:
+    #image: registry.docker.ufjf.br/ufjf/impressao/dashboard:v1.0.0
+    image: impressao:1
+    environment:
+      - DB_PATH=/data/local/impressoras.db
+    volumes:
+      - impressao_data:/data/local
+    networks:
+      - traefik
+    deploy:
+      replicas: 1 # NUNCA > 1: SQLite é arquivo único
+      placement:
+        constraints:
+          - node.hostname == vayu # fixo no nó que tem o banco (ver cabeçalho)
+      restart_policy:
+        condition: any
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.impressao_prod_dashboard.rule=Host(`painel-impressao.ufjf.br`)"
+        - "traefik.http.routers.impressao_prod_dashboard.tls=true"
+        - "traefik.http.services.impressao_prod_dashboard.loadbalancer.server.port=8501"
+        - 'traefik.http.routers.impressao_prod_dashboard.middlewares=impressao_prod_dashboard-ipallowlist'
+        - 'traefik.http.middlewares.impressao_prod_dashboard-ipallowlist.ipallowlist.sourcerange=10.0.0.0/8,200.131.19.160/28'
+
+networks:
+  traefik:
+    external: true
+
+volumes:
+  impressao_data:
+    external: true

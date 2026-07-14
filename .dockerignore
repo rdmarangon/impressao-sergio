@@ -1,0 +1,18 @@
+# Banco e planilhas ficam fora da imagem (montados por volume / usados só na importação)
+*.db
+instance/
+*.xlsx
+
+# Sobras da versão Flask antiga (não usadas pelo dashboard)
+models.py
+templates/
+importar_*.py
+
+__pycache__/
+*.pyc
+.git/
+
+# Ambiente virtual local e artefatos de build (não vão pra imagem)
+.venv/
+venv/
+*.tar.gz

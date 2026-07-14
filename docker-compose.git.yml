@@ -1,0 +1,27 @@
+# ==============================================================================
+# USO: STANDALONE apenas (docker compose up), para rodar local/dev ou num host
+#      Docker sem Swarm. Builda a imagem a partir do Dockerfile deste diretório.
+#
+# ⚠️  NÃO use este arquivo como stack no Swarm/Portainer.
+#     O `build:` não é suportado em stack Swarm — dá o erro
+#     "Unable to build image: Unable to find the targeted agent".
+#     Para produção (Swarm), use o docker-compose.yml (image: impressao:1,
+#     buildada no nó vayu) com placement + labels do Traefik.
+#
+# Usa o MESMO volume externo do banco (impressao_data -> /data/local).
+# ==============================================================================
+services:
+  impressao:
+    build: .
+    container_name: impressao-dashboard
+    restart: unless-stopped
+    environment:
+      - DB_PATH=/data/local/impressoras.db
+    ports:
+      - "8501:8501"
+    volumes:
+      - impressao_data:/data/local
+
+volumes:
+  impressao_data:
+    external: true
