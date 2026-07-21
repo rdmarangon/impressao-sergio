@@ -26,7 +26,10 @@ services:
     environment:
       - DB_PATH=/data/local/impressoras.db
     volumes:
-      - impressao_data:/data/local
+      # Bind mount no padrão de backup da casa: o job Borg `nodesDocker` faz backup
+      # de /data/local em cada nó (vayu incluso). Com o banco em /data/local/impressao
+      # no host, ele é pego automaticamente — sem repo/script dedicado.
+      - /data/local/impressao:/data/local
     networks:
       - traefik
     deploy:
@@ -46,8 +49,4 @@ services:
 
 networks:
   traefik:
-    external: true
-
-volumes:
-  impressao_data:
     external: true
