@@ -15,6 +15,7 @@ st.set_page_config(
     layout="wide",
 )
 
+
 # Função para converter a logo local em string Base64
 def obter_base64_da_imagem(caminho_imagem):
     if os.path.exists(caminho_imagem):
@@ -146,7 +147,7 @@ st.title("Serviço de Impressão Corporativa (Dashboard)")
 
 @st.cache_data
 def carregar_dados():
-    conn = sqlite3.connect(os.environ.get("DB_PATH", "impressoras.db"))
+    conn = sqlite3.connect("impressoras.db")
     df = pd.read_sql("SELECT * FROM consumo_impressoras", conn)
     conn.close()
 
@@ -168,7 +169,7 @@ def carregar_dados():
 df = carregar_dados()
 
 # =====================================================
-# PERÍODOS DISPONÍVEIS (Padrão de 6 meses iniciais)
+# PERÍODOS DISPONÍVEIS (Padrão de 12 meses iniciais)
 # =====================================================
 
 periodos = sorted(df["periodo"].unique())
@@ -176,7 +177,7 @@ periodos = sorted(df["periodo"].unique())
 ultimo_periodo = pd.Timestamp(max(periodos))
 indice_final = periodos.index(ultimo_periodo)
 
-indice_inicial = max(0, indice_final - 5)
+indice_inicial = max(0, indice_final - 11)
 
 # =====================================================
 # SIDEBAR
@@ -287,7 +288,7 @@ maior_mes = maior_linha["eixo_x"]
 menor_consumo = int(menor_linha["paginas"])
 menor_mes = menor_linha["eixo_x"]
 
-equipamentos_ativos = df_filtrado["equipamento"].nunique()
+equipamentos_ativos = df_filtrado["controle"].astype(str).str.strip().nunique()
 
 # =====================================================
 # EXIBIÇÃO DOS CARDS DE MÉTRICAS
