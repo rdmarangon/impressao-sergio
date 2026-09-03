@@ -147,8 +147,22 @@ st.title("Serviço de Impressão Corporativa (Dashboard)")
 
 @st.cache_data
 def carregar_dados():
-    conn = sqlite3.connect("impressoras.db")
-    df = pd.read_sql("SELECT * FROM consumo_impressoras", conn)
+    conn = sqlite3.connect(os.environ.get("DB_PATH", "impressao.db"))
+    query = """
+        SELECT 
+            p.ano,
+            p.mes,
+            e.serial,
+            e.controle,
+            e.local,
+            e.tipo,
+            e.marca,
+            e.modelo,
+            p.paginas
+        FROM producao p
+        JOIN equipamento e ON p.id_equipamento = e.id
+    """
+    df = pd.read_sql(query, conn)
     conn.close()
 
     df["ano"] = pd.to_numeric(df["ano"], errors="coerce").fillna(0).astype(int)

@@ -24,7 +24,7 @@ services:
     #image: registry.docker.ufjf.br/ufjf/impressao/dashboard:v1.0.0
     image: impressao:1
     environment:
-      - DB_PATH=/data/local/impressoras.db
+      - DB_PATH=/data/local/impressao.db
     volumes:
       # Bind mount no padrão de backup da casa: o job Borg `nodesDocker` faz backup
       # de /data/local em cada nó (vayu incluso). Com o banco em /data/local/impressao
