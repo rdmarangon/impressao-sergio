@@ -147,7 +147,7 @@ st.title("Serviço de Impressão Corporativa (Dashboard)")
 
 @st.cache_data
 def carregar_dados():
-    conn = sqlite3.connect("impressao.db")
+    conn = sqlite3.connect(os.environ.get("DB_PATH", "impressao.db"))
     query = """
         SELECT 
             p.ano,
