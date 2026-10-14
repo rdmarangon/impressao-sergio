@@ -147,7 +147,7 @@ st.title("Serviço de Impressão Corporativa (Dashboard)")
 
 @st.cache_data
 def carregar_dados():
-    conn = sqlite3.connect(os.environ.get("DB_PATH", "impressao.db"))
+    conn = sqlite3.connect("impressao.db")
     query = """
         SELECT 
             p.ano,
@@ -216,7 +216,9 @@ periodo_final = st.sidebar.selectbox(
 unidades = sorted(df["local"].unique())
 unidade = st.sidebar.selectbox("Unidade", ["Todas"] + list(unidades))
 
-tipo_selecionado = st.sidebar.selectbox("Tipo", ["Todos", "Tipo I", "Tipo III"])
+tipo_selecionado = st.sidebar.selectbox(
+    "Tipo", ["Todos", "Tipo I", "Tipo III", "Tipo IV"]
+)
 
 # =====================================================
 # FILTRAGEM
@@ -233,7 +235,13 @@ if unidade != "Todas":
     df_filtrado = df_filtrado[df_filtrado["local"] == unidade]
 
 if tipo_selecionado != "Todos":
-    tipo_filtro = "I" if tipo_selecionado == "Tipo I" else "III"
+    # Mapeia seleção para código interno (I, III ou IV)
+    if tipo_selecionado == "Tipo I":
+        tipo_filtro = "I"
+    elif tipo_selecionado == "Tipo III":
+        tipo_filtro = "III"
+    else:  # "Tipo IV"
+        tipo_filtro = "IV"
     df_filtrado = df_filtrado[df_filtrado["tipo"] == tipo_filtro]
 else:
     tipo_filtro = "Todos"
@@ -328,6 +336,9 @@ fig_evolucao = px.line(
 )
 
 fig_evolucao.update_xaxes(tickangle=-45, title_text="Período")
+
+# Remove legend (single trace) to avoid "categoria: <mes>" label
+fig_evolucao.update_layout(showlegend=False)
 
 st.plotly_chart(fig_evolucao, use_container_width=True)
 
